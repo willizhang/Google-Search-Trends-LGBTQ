@@ -1,0 +1,51 @@
+---
+title: "Google Search Trends for LGBTQ Topic"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+### 1. Load Package
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(zoo)
+```
+
+### 2. Import Dataset
+```{r}
+trends_data <- read.csv('/Users/guoqiang.zhang/Library/CloudStorage/OneDrive-KarolinskaInstitutet/Karolinska Institutet/Research Projects/Population Trends and Individual Fluidity of Sexual Identity in Stockholm County/Research Letter/Media/The Conversation/google-trends-lgbtq/multiTimeline_lgbtq.csv',
+                    skip = 1,
+                    check.names = FALSE )
+```
+
+### 3. Prepare Dataset
+```{r}
+str(trends_data)
+
+trends_data <- trends_data %>%
+  mutate( Month = as.yearmon( Month, format = "%Y-%m" ) )
+
+long_data <- trends_data %>%
+  pivot_longer(
+    cols = -Month, # All columns except 'Month'
+    names_to = "Country", # Name for the new column that stores the previous column names
+    values_to = "TrendScore" # Name for the new column that stores the values
+  )
+
+```
+
+### 4. Plotting
+```{r}
+ggplot(long_data, aes(x = Month, y = TrendScore, color = Country)) +
+  geom_line(size = 1) +
+  labs(title = "Google Trends Data by Country",
+       x = "Month",
+       y = "Trend Score",
+       color = "Country") +
+  theme_minimal() +
+  theme(text = element_text(size = 14),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom")
+```
