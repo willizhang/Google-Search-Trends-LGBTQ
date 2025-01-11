@@ -21,7 +21,7 @@ trends_data <- read.csv( "multiTimeline.csv",
                          skip = 1,
                          check.names = FALSE )
 
-str( trends_data )
+summary( trends_data )
 
 long_data <- trends_data %>%
   pivot_longer(
@@ -51,9 +51,54 @@ summary( long_data )
 ```
 
 ### 3. Plotting
+#### 3.1. Static plot
 ```{r}
-# interactive plot
+ggplot( long_data,
+        aes( x = Month, y = Search_Interest, color = Icon_Label ) ) +
+  
+  geom_line( linewidth = 0.7 ) +
+  
+  scale_color_manual( 
+    values = c(
+      "UK (\U1F308)" = "#C77CFF",
+      "Sweden (\U1F308)" = "#00BFC4",
+      "US (\U1F308)" = "#7CAE00",
+      "UK (\U1F349)" = "red" )
+    ) + 
+  
+  scale_x_date(
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2024-12-01" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    date_labels = "%Y",
+    expand = c( 0.02, 0 )
+    ) +
+  
+  labs( title = "Google Search Trends for ‘LGBTQ’ and ‘Watermelon’ Over Time",
+        subtitle = "From 2009-01-01 to 2024-12-31",
+        x = "Year",
+        y = "Search Interest" ) +
+  
+  theme_classic() +
+  
+  theme( 
+    plot.title = element_text( family = "Arial", face = "bold", size = 14, hjust = 0.5 ),
+    plot.subtitle = element_text( family = "Arial", size = 13, hjust = 0.5, margin = margin( b = 10 ) ),
+    axis.title.x = element_text( family = "Arial", size = 12 ),
+    axis.text.x = element_text( family = "Arial", size = 12 ),
+    axis.title.y = element_text( family = "Arial", size = 12 ),
+    axis.text.y = element_text( family = "Arial", size = 12 ),
+    legend.position = "inside",
+    legend.position.inside =  c( 0.1, 0.9 ),
+    legend.text = element_text( family = "Arial", size = 11 )
+    ) +
+  
+  guides(
+    color = guide_legend( title = NULL )
+  )
+```
 
+#### 3.2. Interative plot
+```{r}
 p <- plot_ly(
   
   data = long_data,
