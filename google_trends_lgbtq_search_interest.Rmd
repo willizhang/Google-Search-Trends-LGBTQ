@@ -53,7 +53,8 @@ summary( long_data )
 ### 3. Plotting
 #### 3.1. Static plot
 ```{r}
-ggplot( long_data,
+p <- 
+  ggplot( long_data,
         aes( x = Month, y = Search_Interest, color = Icon_Label ) ) +
   
   geom_line( linewidth = 0.7 ) +
@@ -95,6 +96,9 @@ ggplot( long_data,
   guides(
     color = guide_legend( title = NULL )
   )
+
+p
+ggsave( "p.png", plot = p, width = 9, height = 9 / 1.55, dpi = 600 ) 
 ```
 
 #### 3.2. Interative plot
