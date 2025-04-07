@@ -1,5 +1,5 @@
 ---
-title: "Google Search Trends Over Time: ‘LGBTQ’ and ‘Watermelon’"
+title: "Google Search Trends for the Topic ‘LGBTQ’, 2009-2025"
 author: Willi Zhang
 email: willi.zhang@ki.se
 output: html_notebook
@@ -12,12 +12,87 @@ editor_options:
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(plotly)
 ```
 
-### 2. Import & Prepare Dataset
+### 2. Compare across countries
 ```{r}
 trends_data <- read.csv( "multiTimeline.csv",
+                         skip = 1,
+                         check.names = FALSE )
+
+summary( trends_data )
+
+long_data <- trends_data %>%
+  pivot_longer(
+    cols = -Month,
+    names_to = "Search_Term",
+    values_to = "Search_Interest"
+    ) %>%
+  mutate(
+    Month = as.Date( paste0( Month, "-01" ) ) 
+    )
+
+icon_labels <- c(
+  "LGBTQ: (United Kingdom)" = "UK (\U1F308)",
+  "LGBTQ: (Sweden)" = "Sweden (\U1F308)",
+  "LGBTQ: (United States)" = "US (\U1F308)",
+  "LGBTQ: (Canada)" = "Canada (\U1F308)"
+  )
+
+long_data <- long_data %>%
+  mutate(
+    Icon_Label = factor( recode( Search_Term, !!!icon_labels ),
+                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)" ) ) )
+str( long_data )
+summary( long_data )
+
+p_lgbtq <- 
+  ggplot( long_data,
+        aes( x = Month, y = Search_Interest, color = Icon_Label ) ) +
+  
+  geom_line( linewidth = 0.7 ) +
+  
+  scale_color_manual( 
+    values = c(
+      "UK (\U1F308)" = "#C77CFF",
+      "Canada (\U1F308)" = "#00BFC4",
+      "US (\U1F308)" = "#7CAE00",
+      "Sweden (\U1F308)" = "red" )
+    ) + 
+  
+  scale_x_date(
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    date_labels = "%Y",
+    expand = c( 0.02, 0 )
+    ) +
+  
+  labs( x = "Year",
+        y = "Search Interest" ) +
+  
+  theme_classic() +
+  
+  theme( 
+    axis.title.x = element_text( family = "Arial", size = 11 ),
+    axis.text.x = element_text( family = "Arial", size = 11 ),
+    axis.title.y = element_text( family = "Arial", size = 11 ),
+    axis.text.y = element_text( family = "Arial", size = 11 ),
+    legend.position = "inside",
+    legend.position.inside =  c( 0.1, 0.9 ),
+    legend.text = element_text( family = "Arial", size = 10 )
+    ) +
+  
+  guides(
+    color = guide_legend( title = NULL )
+  )
+
+p_lgbtq
+ggsave( "p_lgbtq.png", plot = p_lgbtq, width = 9, height = 9 / 1.55, dpi = 600 )
+```
+
+### 3. Compare with watermelon
+```{r}
+trends_data <- read.csv( "multiTimeline_watermelon.csv",
                          skip = 1,
                          check.names = FALSE )
 
@@ -38,22 +113,18 @@ icon_labels <- c(
   "LGBTQ: (United Kingdom)" = "UK (\U1F308)",
   "LGBTQ: (Sweden)" = "Sweden (\U1F308)",
   "LGBTQ: (United States)" = "US (\U1F308)",
-  "Watermelon: (United Kingdom)" = "UK (\U1F349)"
-  )
+  "LGBTQ: (Canada)" = "Canada (\U1F308)",
+  "Watermelon: (United Kingdom)" = "UK (\U1F349)" )
 
 long_data <- long_data %>%
   mutate(
-    Icon_Label = recode( Search_Term, !!!icon_labels )
-    )
+    Icon_Label = factor( recode( Search_Term, !!!icon_labels ),
+                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "UK (🍉)" ) ) )
 
 str( long_data )
 summary( long_data )
-```
 
-### 3. Plotting
-#### 3.1. Static plot
-```{r}
-p <- 
+p_watermelon <- 
   ggplot( long_data,
         aes( x = Month, y = Search_Interest, color = Icon_Label ) ) +
   
@@ -62,115 +133,119 @@ p <-
   scale_color_manual( 
     values = c(
       "UK (\U1F308)" = "#C77CFF",
-      "Sweden (\U1F308)" = "#00BFC4",
+      "Canada (\U1F308)" = "#00BFC4",
       "US (\U1F308)" = "#7CAE00",
-      "UK (\U1F349)" = "red" )
+      "Sweden (\U1F308)" = "red",
+      "UK (\U1F349)" = "#FF00FF"
+      )
     ) + 
   
   scale_x_date(
-    limits = c( as.Date( "2009-01-01" ), as.Date( "2024-12-01" ) ),
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
     breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
     date_labels = "%Y",
     expand = c( 0.02, 0 )
     ) +
   
-  labs( title = "Google Search Trends for ‘LGBTQ’ and ‘Watermelon’ Over Time",
-        subtitle = "From 2009-01-01 to 2024-12-31",
-        x = "Year",
+  labs( x = "Year",
         y = "Search Interest" ) +
   
   theme_classic() +
   
   theme( 
-    plot.title = element_text( family = "Arial", face = "bold", size = 14, hjust = 0.5 ),
-    plot.subtitle = element_text( family = "Arial", size = 13, hjust = 0.5, margin = margin( b = 10 ) ),
-    axis.title.x = element_text( family = "Arial", size = 12 ),
-    axis.text.x = element_text( family = "Arial", size = 12 ),
-    axis.title.y = element_text( family = "Arial", size = 12 ),
-    axis.text.y = element_text( family = "Arial", size = 12 ),
+    axis.title.x = element_text( family = "Arial", size = 11 ),
+    axis.text.x = element_text( family = "Arial", size = 11 ),
+    axis.title.y = element_text( family = "Arial", size = 11 ),
+    axis.text.y = element_text( family = "Arial", size = 11 ),
     legend.position = "inside",
     legend.position.inside =  c( 0.1, 0.9 ),
-    legend.text = element_text( family = "Arial", size = 11 )
+    legend.text = element_text( family = "Arial", size = 10 )
     ) +
   
   guides(
     color = guide_legend( title = NULL )
   )
 
-p
-ggsave( "p.png", plot = p, width = 9, height = 9 / 1.55, dpi = 600 ) 
+p_watermelon
+ggsave( "p_watermelon.png", plot = p_watermelon, width = 9, height = 9 / 1.55, dpi = 600 )
 ```
 
-#### 3.2. Interative plot
+### 4. Compare with ice cream
 ```{r}
-p <- plot_ly(
-  
-  data = long_data,
-  x = ~ Month,
-  y = ~ Search_Interest,
-  color = ~ Icon_Label,
-  colors = c(
-    "UK (\U1F308)" = "#C77CFF",
-    "Sweden (\U1F308)" = "#00BFC4",
-    "US (\U1F308)" = "#7CAE00",
-    "UK (\U1F349)" = "red" ),
-  
-  type = 'scatter',
-  mode = 'lines',
-  line = list( width = 1.5 ) ) %>%
-  
-  layout(
-    title = list(
-      text = "Google Search Trends for ‘LGBTQ’ and ‘Watermelon’ Over Time<br><span style='font-size:12px;'>From 2009-01-01 to 2024-12-31</span>",
-      font = list( family = "Arial", size = 16 ),
-      x = 0.1,  # Align title to the left
-      y = 0.95    # Vertical positioning
-      ),
-    
-    xaxis = list(
-      title = "Year",
-      tickformat = "%Y",
-      tickvals = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
-      range = c( as.Date( "2009-01-01" ) - 150, as.Date( "2024-12-01") + 100 ),
-      titlefont = list( family = "Arial", size = 14 ),
-      tickfont = list( family = "Arial", size = 14 ),
-      linecolor = "black",
-      linewidth = 1,
-      ticks = "outside",
-      showgrid = FALSE
-      ),
-    
-    yaxis = list(
-      title = "Search Interest",
-      titlefont = list( family = "Arial", size = 14 ),
-      tickfont = list( family = "Arial", size = 14 ),
-      range = c(-3, 103),
-      zeroline = FALSE,
-      showline = TRUE,
-      linecolor = "black",
-      linewidth = 1,
-      range = c(0, 102),
-      ticks = "outside",
-      mirror = FALSE,
-      showgrid = FALSE
-      ),
-    
-    legend = list(
-      title = list( text = NULL ),
-      font = list( family = "Arial", size = 14 ),
-      x = 0.05,
-      xanchor = "left",
-      y = 0.8,
-      yanchor = "top"
-      ),
-    
-    margin = list(
-      t = 60,  # Add space at the top for the title (measured in pixels)
-      r = 40,  # Right margin
-      b = 50,  # Bottom margin
-      l = 60   # Left margin
+trends_data <- read.csv( "multiTimeline_ice_cream.csv",
+                         skip = 1,
+                         check.names = FALSE )
+
+summary( trends_data )
+
+long_data <- trends_data %>%
+  pivot_longer(
+    cols = -Month,
+    names_to = "Search_Term",
+    values_to = "Search_Interest"
+    ) %>%
+  mutate(
+    Month = as.Date( paste0( Month, "-01" ) ),
+    Category = ifelse( grepl( "Ice cream", Search_Term ), "Ice cream", "LGBTQ" )
     )
+
+icon_labels <- c(
+  "LGBTQ: (United Kingdom)" = "UK (\U1F308)",
+  "LGBTQ: (Sweden)" = "Sweden (\U1F308)",
+  "LGBTQ: (United States)" = "US (\U1F308)",
+  "LGBTQ: (Canada)" = "Canada (\U1F308)",
+  "Ice cream: (United Kingdom)" = "UK (\U1F366)" )
+
+long_data <- long_data %>%
+  mutate(
+    Icon_Label = factor( recode( Search_Term, !!!icon_labels ),
+                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "UK (🍦)" ) ) )
+
+str( long_data )
+summary( long_data )
+
+p_ice_cream <- 
+  ggplot( long_data,
+        aes( x = Month, y = Search_Interest, color = Icon_Label ) ) +
+  
+  geom_line( linewidth = 0.7 ) +
+  
+  scale_color_manual( 
+    values = c(
+      "UK (\U1F308)" = "#C77CFF",
+      "Canada (\U1F308)" = "#00BFC4",
+      "US (\U1F308)" = "#7CAE00",
+      "Sweden (\U1F308)" = "red",
+      "UK (\U1F366)" = "#FDB462"
+      )
+    ) + 
+  
+  scale_x_date(
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    date_labels = "%Y",
+    expand = c( 0.02, 0 )
+    ) +
+  
+  labs( x = "Year",
+        y = "Search Interest" ) +
+  
+  theme_classic() +
+  
+  theme( 
+    axis.title.x = element_text( family = "Arial", size = 11 ),
+    axis.text.x = element_text( family = "Arial", size = 11 ),
+    axis.title.y = element_text( family = "Arial", size = 11 ),
+    axis.text.y = element_text( family = "Arial", size = 11 ),
+    legend.position = "inside",
+    legend.position.inside =  c( 0.1, 0.9 ),
+    legend.text = element_text( family = "Arial", size = 10 )
+    ) +
+  
+  guides(
+    color = guide_legend( title = NULL )
   )
 
-p
+p_ice_cream
+ggsave( "p_ice_cream.png", plot = p_ice_cream, width = 9, height = 9 / 1.55, dpi = 600 )
 ```
