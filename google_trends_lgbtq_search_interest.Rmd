@@ -249,3 +249,83 @@ p_ice_cream <-
 p_ice_cream
 ggsave( "p_ice_cream.png", plot = p_ice_cream, width = 9, height = 9 / 1.55, dpi = 600 )
 ```
+
+### 5. Compare with mango
+```{r}
+trends_data <- read.csv( "multiTimeline_mango.csv",
+                         skip = 1,
+                         check.names = FALSE )
+
+summary( trends_data )
+
+long_data <- trends_data %>%
+  pivot_longer(
+    cols = -Month,
+    names_to = "Search_Term",
+    values_to = "Search_Interest"
+    ) %>%
+  mutate(
+    Month = as.Date( paste0( Month, "-01" ) ),
+    Category = ifelse( grepl( "Mango", Search_Term ), "Mango", "LGBTQ" )
+    )
+
+icon_labels <- c(
+  "LGBTQ: (United Kingdom)" = "UK (\U1F308)",
+  "LGBTQ: (Sweden)" = "Sweden (\U1F308)",
+  "LGBTQ: (United States)" = "US (\U1F308)",
+  "LGBTQ: (Canada)" = "Canada (\U1F308)",
+  "Mango: (United States)" = "US (\U1F96D)" )
+
+long_data <- long_data %>%
+  mutate(
+    Icon_Label = factor( recode( Search_Term, !!!icon_labels ),
+                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "US (🥭)" ) ) )
+
+str( long_data )
+summary( long_data )
+
+p_mango <- 
+  ggplot( long_data,
+        aes( x = Month, y = Search_Interest, color = Icon_Label ) ) +
+  
+  geom_line( linewidth = 0.7 ) +
+  
+  scale_color_manual( 
+    values = c(
+      "UK (\U1F308)" = "#C77CFF",
+      "Canada (\U1F308)" = "#00BFC4",
+      "US (\U1F308)" = "#7CAE00",
+      "Sweden (\U1F308)" = "red",
+      "US (\U1F96D)" = "#FDB462"
+      )
+    ) + 
+  
+  scale_x_date(
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    date_labels = "%Y",
+    expand = c( 0.02, 0 )
+    ) +
+  
+  labs( x = "Year",
+        y = "Search Interest" ) +
+  
+  theme_classic() +
+  
+  theme( 
+    axis.title.x = element_text( family = "Arial", size = 11 ),
+    axis.text.x = element_text( family = "Arial", size = 11 ),
+    axis.title.y = element_text( family = "Arial", size = 11 ),
+    axis.text.y = element_text( family = "Arial", size = 11 ),
+    legend.position = "inside",
+    legend.position.inside =  c( 0.1, 0.9 ),
+    legend.text = element_text( family = "Arial", size = 10 )
+    ) +
+  
+  guides(
+    color = guide_legend( title = NULL )
+  )
+
+p_mango
+ggsave( "p_mango.png", plot = p_mango, width = 9, height = 9 / 1.55, dpi = 600 )
+```
