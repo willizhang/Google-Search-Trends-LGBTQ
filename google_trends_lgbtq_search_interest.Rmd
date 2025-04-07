@@ -136,7 +136,7 @@ p_watermelon <-
       "Canada (\U1F308)" = "#00BFC4",
       "US (\U1F308)" = "#7CAE00",
       "Sweden (\U1F308)" = "red",
-      "UK (\U1F349)" = "#FF00FF"
+      "UK (\U1F349)" = "#FDB462"
       )
     ) + 
   
