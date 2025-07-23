@@ -16,7 +16,7 @@ library(ggplot2)
 
 ### 2. Compare across countries
 ```{r}
-trends_data <- read.csv( "multiTimeline.csv",
+trends_data <- read.csv( "multiTimeline_lgbtq.csv",
                          skip = 1,
                          check.names = FALSE )
 
@@ -61,8 +61,8 @@ p_lgbtq <-
     ) + 
   
   scale_x_date(
-    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
-    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-06-30" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2025-07-01" ), by = "2 year" ),
     date_labels = "%Y",
     expand = c( 0.02, 0 )
     ) +
@@ -114,12 +114,12 @@ icon_labels <- c(
   "LGBTQ: (Sweden)" = "Sweden (\U1F308)",
   "LGBTQ: (United States)" = "US (\U1F308)",
   "LGBTQ: (Canada)" = "Canada (\U1F308)",
-  "Watermelon: (United Kingdom)" = "UK (\U1F349)" )
+  "Watermelon: (Sweden)" = "Sweden (\U1F349)" )
 
 long_data <- long_data %>%
   mutate(
     Icon_Label = factor( recode( Search_Term, !!!icon_labels ),
-                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "UK (🍉)" ) ) )
+                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "Sweden (🍉)" ) ) )
 
 str( long_data )
 summary( long_data )
@@ -136,13 +136,13 @@ p_watermelon <-
       "Canada (\U1F308)" = "#00BFC4",
       "US (\U1F308)" = "#7CAE00",
       "Sweden (\U1F308)" = "red",
-      "UK (\U1F349)" = "#FDB462"
+      "Sweden (\U1F349)" = "#FDB462"
       )
     ) + 
   
   scale_x_date(
-    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
-    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-06-30" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2025-07-01" ), by = "2 year" ),
     date_labels = "%Y",
     expand = c( 0.02, 0 )
     ) +
@@ -177,6 +177,9 @@ trends_data <- read.csv( "multiTimeline_ice_cream.csv",
                          check.names = FALSE )
 
 summary( trends_data )
+table( unique( trends_data$`LGBTQ: (Sweden)` ) )
+trends_data <- trends_data %>%
+  mutate( `LGBTQ: (Sweden)` = as.numeric( gsub( "<1", "0", `LGBTQ: (Sweden)` ) ) )
 
 long_data <- trends_data %>%
   pivot_longer(
@@ -194,12 +197,12 @@ icon_labels <- c(
   "LGBTQ: (Sweden)" = "Sweden (\U1F308)",
   "LGBTQ: (United States)" = "US (\U1F308)",
   "LGBTQ: (Canada)" = "Canada (\U1F308)",
-  "Ice cream: (United Kingdom)" = "UK (\U1F366)" )
+  "Ice cream: (Sweden)" = "Sweden (\U1F366)" )
 
 long_data <- long_data %>%
   mutate(
     Icon_Label = factor( recode( Search_Term, !!!icon_labels ),
-                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "UK (🍦)" ) ) )
+                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "Sweden (🍦)" ) ) )
 
 str( long_data )
 summary( long_data )
@@ -216,13 +219,13 @@ p_ice_cream <-
       "Canada (\U1F308)" = "#00BFC4",
       "US (\U1F308)" = "#7CAE00",
       "Sweden (\U1F308)" = "red",
-      "UK (\U1F366)" = "#FDB462"
+      "Sweden (\U1F366)" = "#FDB462"
       )
     ) + 
   
   scale_x_date(
-    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
-    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-06-30" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2025-07-01" ), by = "2 year" ),
     date_labels = "%Y",
     expand = c( 0.02, 0 )
     ) +
@@ -274,12 +277,12 @@ icon_labels <- c(
   "LGBTQ: (Sweden)" = "Sweden (\U1F308)",
   "LGBTQ: (United States)" = "US (\U1F308)",
   "LGBTQ: (Canada)" = "Canada (\U1F308)",
-  "Mango: (United States)" = "US (\U1F96D)" )
+  "Mango: (Sweden)" = "Sweden (\U1F96D)" )
 
 long_data <- long_data %>%
   mutate(
     Icon_Label = factor( recode( Search_Term, !!!icon_labels ),
-                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "US (🥭)" ) ) )
+                         levels = c( "Canada (🌈)", "Sweden (🌈)", "UK (🌈)", "US (🌈)", "Sweden (🥭)" ) ) )
 
 str( long_data )
 summary( long_data )
@@ -296,13 +299,13 @@ p_mango <-
       "Canada (\U1F308)" = "#00BFC4",
       "US (\U1F308)" = "#7CAE00",
       "Sweden (\U1F308)" = "red",
-      "US (\U1F96D)" = "#FDB462"
+      "Sweden (\U1F96D)" = "#FDB462"
       )
     ) + 
   
   scale_x_date(
-    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-03-01" ) ),
-    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2024-07-01" ), by = "3 year" ),
+    limits = c( as.Date( "2009-01-01" ), as.Date( "2025-06-30" ) ),
+    breaks = seq( as.Date( "2009-07-01" ), as.Date( "2025-07-01" ), by = "2 year" ),
     date_labels = "%Y",
     expand = c( 0.02, 0 )
     ) +
